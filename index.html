@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C League Network</title>
+<style>
+:root{--bg:#0b1421;--panel:#203650;--blue:#18375e;--gold:#f2ad3d;--muted:#c5d8ef;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font:16px system-ui,Arial,sans-serif}
+header{background:var(--blue);padding:22px max(18px,calc((100% - 920px)/2))}
+.brand{display:flex;align-items:center;gap:12px}.logo{background:var(--gold);color:#18375e;border-radius:12px;padding:12px;font-size:24px}
+h1{font-size:clamp(26px,5vw,38px);margin:0}header p{color:var(--muted);margin:8px 0 18px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{background:#25466d;border-radius:10px;padding:10px 16px;min-width:95px}.stat b{display:block;font-size:23px}
+main{max-width:920px;margin:auto;padding:18px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+button,select,input{font:inherit;border-radius:9px;padding:10px 12px;border:1px solid #536d8c}
+button{background:#294b72;color:white;cursor:pointer}button.active,button.primary{background:var(--gold);color:#172c4b;border-color:var(--gold);font-weight:750}
+button:disabled{opacity:.45;cursor:not-allowed}input,select{background:#13243a;color:white;width:100%}
+.panel,.game,.ticket{background:var(--panel);border-radius:12px;padding:16px;margin:10px 0}
+.match{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0;font-weight:700}.vs{color:var(--gold)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.tag{display:inline-block;background:#34577d;padding:4px 8px;border-radius:20px;font-size:12px}
+.ticket{border:2px dashed var(--gold);background:linear-gradient(135deg,#203650,#18375e)}
+.ticket h2{color:var(--gold)}.muted{color:var(--muted);font-size:13px}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+label{display:block;margin:10px 0 5px;color:var(--muted);font-size:14px}.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.choice{background:#132a43;border:1px solid #58718e;border-radius:10px;padding:12px;cursor:pointer}.choice:has(input:checked){border:2px solid var(--gold);background:#294564}.choice input{width:auto;margin-right:7px}
+.notice{padding:12px;border-radius:10px;background:#183f36;margin:10px 0}.warning{background:#4b3022;padding:12px;border-radius:10px;margin:10px 0}
+footer{text-align:center;color:var(--muted);padding:24px;font-size:12px}
+</style></head>
+<body>
+<header>
+ <div class="brand"><div class="logo">🏆</div><div><h1>C LEAGUE</h1><div class="muted">CRIMPCHIMPS LEAGUE NETWORK</div></div></div>
+ <p>THE GAME STARTS HERE. Your teams. Your games. Your tickets.</p>
+ <div class="stats"><div class="stat"><b>28</b><span class="muted">TEAMS</span></div><div class="stat"><b>50</b><span class="muted">GAMES</span></div><div class="stat"><b>4</b><span class="muted">BROADCAST OPTIONS</span></div></div>
+</header>
+<main>
+ <section id="login" class="panel">
+  <span class="tag">C LEAGUE MEMBER LOGIN</span><h2>Welcome to C League</h2>
+  <p>Enter your name to log in. No password needed.</p>
+  <label for="loginName">Your name</label><input id="loginName" placeholder="Enter your name" autocomplete="name">
+  <button class="primary" id="loginButton" style="margin-top:12px">Log in</button>
+  <p class="muted">Ticket access is available to Orion, Chloe, and Bumpkin.</p>
+  <div id="loginMessage" aria-live="polite"></div>
+ </section>
+ <section id="site" class="hidden">
+  <div class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+   <div>Logged in as <b id="memberName"></b><div class="muted" id="accessStatus"></div></div><button id="logout">Log out</button>
+  </div>
+  <nav class="tabs">
+   <button class="active" data-tab="home">Home</button><button data-tab="schedule">Schedule</button><button data-tab="teams">Teams</button><button data-tab="watch">Watch</button><button data-tab="tickets">My Tickets</button>
+  </nav>
+  <section id="home" class="view">
+   <div class="panel"><span class="tag">SEASON 1</span><h2>Welcome to C League</h2><p>Explore 28 franchises, browse the 50-game regular-season schedule, set up a broadcast, and check your ticket access.</p><button class="primary" onclick="showTab('schedule')">View schedule</button></div>
+   <div class="panel"><h2>Choose a league</h2><select id="league"><option>C League</option><option>NBCA</option><option>NBA</option><option>G League</option></select><p class="muted">The supplied 50-game schedule is for C League. Other leagues are selectable but do not have schedules loaded.</p></div>
+  </section>
+  <section id="schedule" class="view hidden"><div class="panel"><h2>Regular-season schedule</h2><p class="muted">50 MATCHUPS • C LEAGUE</p><input id="gameSearch" placeholder="Search games or teams…"><div id="games"></div></div></section>
+  <section id="teams" class="view hidden"><div class="panel"><h2>All 28 franchises</h2><input id="teamSearch" placeholder="Search a team…"><div id="teamsList" class="grid"></div></div></section>
+  <section id="watch" class="view hidden">
+   <div class="panel"><h2>Watch Center</h2><label>Choose a game</label><select id="watchGame"></select>
+    <label>Game date</label><input id="watchDate" type="date" value="2026-11-03">
+    <label>Start time</label><input id="watchTime" value="7:00 PM">
+    <label>Where you're watching from</label><input id="watchLocation" placeholder="City, home, or venue">
+    <div class="panel"><div class="muted">RANDOMLY ASSIGNED BROADCAST</div><h2 id="channelName">Prime Video</h2><button id="randomChannel">🎲 Randomize channel</button></div>
+    <button class="primary" id="saveBroadcast">Save game details</button><p class="muted" id="broadcastSaved"></p>
+    <p class="muted">Broadcast assignments are fictional and do not confirm that a game is actually available on that service.</p>
+   </div>
+  </section>
+  <section id="tickets" class="view hidden">
+   <div class="panel"><h2>🎟️ My Tickets</h2><p class="muted">COMPLIMENTARY VIRTUAL OWNER PASSES • $0.00</p>
+    <div id="noAccess" class="warning hidden">Ticket access is not available for this account. Only Orion, Chloe, and Bumpkin can receive C League virtual tickets.</div>
+    <div id="ticketFlow">
+     <div id="step1">
+      <h3>1. Choose your game</h3><label>Select the game you want tickets for</label><select id="ticketGame"></select>
+      <button class="primary" id="toPayment" style="margin-top:12px">Proceed</button>
+     </div>
+     <div id="step2" class="hidden">
+      <h3>2. Payment</h3><p>Ticket total: <b>$0.00</b></p><p class="muted">No payment is required. Choose an option to continue.</p>
+      <div class="choices">
+       <label class="choice"><input type="radio" name="payment" value="Nothing" checked>Nothing</label>
+       <label class="choice"><input type="radio" name="payment" value="Nothing">Nothing</label>
+      </div>
+      <div class="actions"><button id="back1">Back</button><button class="primary" id="toSeats">Proceed</button></div>
+     </div>
+     <div id="step3" class="hidden">
+      <h3>3. Choose your seating</h3>
+      <div class="choices">
+       <label class="choice"><input type="radio" name="seat" value="Suite">🏟️ Suite</label>
+       <label class="choice"><input type="radio" name="seat" value="Courtside" checked>⭐ Courtside</label>
+       <label class="choice"><input type="radio" name="seat" value="Regular seat">💺 Regular seat</label>
+      </div>
+      <label>How many seats?</label><select id="seatCount"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+      <div class="actions"><button id="back2">Back</button><button class="primary" id="finishTicket">Proceed</button></div>
+     </div>
+     <div id="step4" class="hidden">
+      <h3>4. Your ticket</h3><div id="ticketDisplay"></div>
+      <div class="actions"><button id="newTicket">Get tickets for another game</button><button class="primary" id="printTicket">Print ticket</button></div>
+     </div>
+    </div>
+    <p class="muted">These are fictional digital tickets for this fan-made league, not real event tickets or proof of admission to a physical venue. This demo does not collect payment or reserve real seats.</p>
+   </div>
+  </section>
+ </section>
+</main>
+<footer>C LEAGUE NETWORK • FAN-MADE LEAGUE WEBSITE • VIRTUAL TICKETS ONLY</footer>
+<script>
+const teams=["Chimp Lakers","Basketball Skyhawks","87ers","Nugget Werewolf","Block Hoop","Basketball Wolf","Friend Celtics","Nets","Branch Pelicans","Outer Space Rockets","Trex Basketball","Special Magic","Lightning 🌩️","Chimp Town Explode","Cold Heat","W Warriors","Chimp Diego Clippers","Moon Jazz","Dead Remix","Bumpkin Queen 👑","Horse Ballers","Horizon Suns","Nice Knicks","Mean Bulls","Cute Bucks","Main City Let's Go","Tuff Cavs","Best Spurs"];
+const games=[["87ers","Friend Celtics"],["Chimp Diego Clippers","Cold Heat"],["Bumpkin Queen 👑","Special Magic"],["Special Magic","Lightning 🌩️"],["Cold Heat","Friend Celtics"],["Nugget Werewolf","Cold Heat"],["Branch Pelicans","Mean Bulls"],["Best Spurs","Horse Ballers"],["Chimp Town Explode","Chimp Lakers"],["Chimp Diego Clippers","Best Spurs"],["Basketball Skyhawks","Special Magic"],["W Warriors","Main City Let's Go"],["Chimp Diego Clippers","Mean Bulls"],["Basketball Skyhawks","Trex Basketball"],["87ers","Trex Basketball"],["Mean Bulls","Chimp Town Explode"],["Special Magic","Block Hoop"],["Horse Ballers","Bumpkin Queen 👑"],["Tuff Cavs","W Warriors"],["Chimp Diego Clippers","Horizon Suns"],["Tuff Cavs","Nice Knicks"],["Trex Basketball","Chimp Town Explode"],["Horizon Suns","Bumpkin Queen 👑"],["Lightning 🌩️","Basketball Skyhawks"],["Horizon Suns","Horizon Suns (Rematch)"],["Friend Celtics","Best Spurs"],["Cute Bucks","Friend Celtics"],["Outer Space Rockets","W Warriors"],["Outer Space Rockets","Main City Let's Go"],["Bumpkin Queen 👑","Tuff Cavs"],["Chimp Lakers","Cold Heat"],["Block Hoop","Mean Bulls"],["Friend Celtics","Cute Bucks"],["Cute Bucks","Best Spurs"],["Mean Bulls","Basketball Wolf"],["Moon Jazz","87ers"],["Main City Let's Go","Branch Pelicans"],["W Warriors","Outer Space Rockets"],["Horse Ballers","Basketball Skyhawks"],["Trex Basketball","Best Spurs"],["Chimp Lakers","Nugget Werewolf"],["Special Magic","Horizon Suns"],["Basketball Wolf","Best Spurs"],["W Warriors","Special Magic"],["W Warriors","Friend Celtics"],["Cute Bucks","Bumpkin Queen 👑"],["Block Hoop","87ers"],["Moon Jazz","Outer Space Rockets"],["Nice Knicks","Outer Space Rockets"],["Outer Space Rockets","Basketball Skyhawks"]];
+const channels=["Prime Video","YouTube TV","Spectrum","Spectrum Plus"];
+let member="",canGetTickets=false;
+function showTab(id){document.querySelectorAll(".view").forEach(x=>x.classList.toggle("hidden",x.id!==id));document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));}
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+function gameLabel(g,i){return `Game ${i+1}: ${g[0]} vs. ${g[1]}`}
+function renderGames(){const q=document.getElementById("gameSearch").value.toLowerCase();document.getElementById("games").innerHTML=games.map((g,i)=>({g,i})).filter(x=>gameLabel(x.g,x.i).toLowerCase().includes(q)).map(({g,i})=>`<div class="game"><div class="muted">GAME ${i+1}</div><div class="match"><span>${g[0]}</span><span class="vs">VS</span><span>${g[1]}</span></div><div class="actions"><button onclick="chooseGame(${i+1},'watch')">Game details & broadcast</button><button onclick="chooseGame(${i+1},'tickets')">Get ticket</button></div></div>`).join("")||"<p>No games found.</p>";}
+function renderTeams(){const q=document.getElementById("teamSearch").value.toLowerCase();document.getElementById("teamsList").innerHTML=teams.filter(t=>t.toLowerCase().includes(q)).map(t=>`<button class="team" onclick="filterTeam('${t.replace(/'/g,"\\'")}')">${t}　›</button>`).join("")||"<p>No teams found.</p>";}
+function filterTeam(t){document.getElementById("gameSearch").value=t;renderGames();showTab("schedule");}
+function fillSelectors(){["watchGame","ticketGame"].forEach(id=>document.getElementById(id).innerHTML=games.map((g,i)=>`<option value="${i+1}">${gameLabel(g,i)}</option>`).join(""));}
+function chooseGame(n,tab){if(tab==="tickets"&&!canGetTickets){showTab("tickets");return;}document.getElementById(tab==="watch"?"watchGame":"ticketGame").value=n;if(tab==="tickets")showStep(1);showTab(tab);}
+function randomize(){document.getElementById("channelName").textContent=channels[Math.floor(Math.random()*channels.length)];}
+document.getElementById("randomChannel").addEventListener("click",randomize);
+document.getElementById("saveBroadcast").addEventListener("click",()=>{document.getElementById("broadcastSaved").textContent="Game details saved in this page session. Broadcast: "+document.getElementById("channelName").textContent;});
+document.getElementById("loginButton").addEventListener("click",()=>{
+ const name=document.getElementById("loginName").value.trim();
+ if(!name){document.getElementById("loginMessage").innerHTML='<div class="warning">Please enter your name.</div>';return;}
+ member=name;canGetTickets=["orion","chloe","bumpkin"].includes(name.toLowerCase());
+ document.getElementById("login").classList.add("hidden");document.getElementById("site").classList.remove("hidden");
+ document.getElementById("memberName").textContent=member;
+ document.getElementById("accessStatus").textContent=canGetTickets?"Complimentary virtual ticket access":"Browsing access • No ticket access";
+ document.getElementById("ticketFlow").classList.toggle("hidden",!canGetTickets);
+ document.getElementById("noAccess").classList.toggle("hidden",canGetTickets);
+});
+document.getElementById("logout").addEventListener("click",()=>{member="";canGetTickets=false;document.getElementById("site").classList.add("hidden");document.getElementById("login").classList.remove("hidden");document.getElementById("loginName").value="";});
+function showStep(n){[1,2,3,4].forEach(i=>document.getElementById("step"+i).classList.toggle("hidden",i!==n));}
+document.getElementById("toPayment").addEventListener("click",()=>showStep(2));
+document.getElementById("back1").addEventListener("click",()=>showStep(1));
+document.getElementById("toSeats").addEventListener("click",()=>showStep(3));
+document.getElementById("back2").addEventListener("click",()=>showStep(2));
+document.getElementById("finishTicket").addEventListener("click",()=>{
+ const n=Number(document.getElementById("ticketGame").value),g=games[n-1],seat=document.querySelector('input[name="seat"]:checked').value,count=Number(document.getElementById("seatCount").value);
+ const date=document.getElementById("watchDate").value||"Date to be announced";
+ document.getElementById("ticketDisplay").innerHTML=`<div class="ticket"><div class="ticketnum">C LEAGUE • COMPLIMENTARY VIRTUAL OWNER PASS</div><h2>🎟️ GAME ADMISSION</h2><h2>GAME ${n} / 50</h2><div class="match"><span>${g[0]}</span><span class="vs">VS</span><span>${g[1]}</span></div><p><b>NAME:</b> ${escapeHTML(member)}</p><p><b>SEATING:</b> ${seat}</p><p><b>NUMBER OF SEATS:</b> ${count}</p><p><b>TOTAL:</b> $0.00</p><p><b>PAYMENT:</b> Nothing</p><p><b>DATE:</b> ${date}</p><span class="tag">OWNER ACCESS • FREE</span><p class="ticketnum">Virtual ticket only • No real seat reservation or payment</p></div>`;
+ showStep(4);
+});
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+document.getElementById("newTicket").addEventListener("click",()=>showStep(1));
+document.getElementById("printTicket").addEventListener("click",()=>window.print());
+document.getElementById("gameSearch").addEventListener("input",renderGames);
+document.getElementById("teamSearch").addEventListener("input",renderTeams);
+fillSelectors();renderGames();renderTeams();
+</script></body></html>
